@@ -26,6 +26,7 @@ namespace RenumberNavObjectIds
                 return;
 
             RenumberIds renumberIds = new RenumberIds();
+            renumberIds.OnWriteVerbose += RenumberIds_OnWriteVerbose;
 
             if (!string.IsNullOrEmpty(options.fromobjectid) || !string.IsNullOrEmpty(options.toobjectid) || !string.IsNullOrEmpty(options.noofobjects))
             {
@@ -78,6 +79,11 @@ namespace RenumberNavObjectIds
                     return;
                 }
             }
+        }
+
+        private static void RenumberIds_OnWriteVerbose(string message)
+        {
+            Console.WriteLine(message);
         }
     }
 }
