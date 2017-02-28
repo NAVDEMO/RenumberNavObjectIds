@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenumberNavObjectIds", "RenumberNavObjectIds.csproj", "{8F7380F5-3AC8-49F1-B6A6-3DF499B0A699}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenumberObjectIds", "RenumberObjectIds\RenumberObjectIds.csproj", "{DEA288B1-B6D3-4725-9B10-8256E47D2314}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RenumberNavObjectIds", "RenumberNavObjectIds\RenumberNavObjectIds.csproj", "{8F7380F5-3AC8-49F1-B6A6-3DF499B0A699}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,6 +13,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DEA288B1-B6D3-4725-9B10-8256E47D2314}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEA288B1-B6D3-4725-9B10-8256E47D2314}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEA288B1-B6D3-4725-9B10-8256E47D2314}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEA288B1-B6D3-4725-9B10-8256E47D2314}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8F7380F5-3AC8-49F1-B6A6-3DF499B0A699}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8F7380F5-3AC8-49F1-B6A6-3DF499B0A699}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F7380F5-3AC8-49F1-B6A6-3DF499B0A699}.Release|Any CPU.ActiveCfg = Release|Any CPU
