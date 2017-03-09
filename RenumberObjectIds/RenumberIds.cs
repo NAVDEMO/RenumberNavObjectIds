@@ -91,7 +91,7 @@ namespace RenumberObjectIds
                     {
                         WriteVerbose(string.Format("Renumber {0}", Path.GetFileName(filename)));
                         var encoding = GetNavTextFileEncoding(filename);
-                        var content = System.IO.File.ReadAllText(filename);
+                        var content = System.IO.File.ReadAllText(filename, encoding);
                         renum(extension, ref content);
                         var newFileName = renumFileName(Path.GetFileName(filename));
                         File.WriteAllText(newdirectory + newFileName, content, encoding);
@@ -235,40 +235,53 @@ namespace RenumberObjectIds
             // Handle different types of newline
             var lines = content.Replace("\r\n", "\r").Replace("\n", "\r").Split('\r');
             var lengthDiff = 0;
+            var withinML = false;
             for (var i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];
-                var newline = renumLine(line);
-
-                // If line to be indented, then indent
-                if (line.StartsWith(codelineStart))
+                var newline = line;
+                if (withinML)
                 {
-                    if (lengthDiff < 0)
-                        newline = newline.Remove(0, -lengthDiff);
-                    else if (lengthDiff > 0)
-                        newline = newline.Substring(0, lengthDiff) + newline;
+                    if (line.Trim().EndsWith("];"))
+                        withinML = false;
                 }
                 else
                 {
-                    // Recalc indentation
-                    lengthDiff = 0;
-                    foreach (var obj in this.renumberList)
+                    if ((line.Trim().StartsWith("CaptionML=[", StringComparison.InvariantCultureIgnoreCase)) ||
+                        (line.Trim().StartsWith("ToolTipML=[", StringComparison.InvariantCultureIgnoreCase)))
                     {
-                        var fromStr = obj.FromObjectId.ToString();
-                        var toStr = obj.ToObjectId.ToString();
-                        if (line.StartsWith("    { " + fromStr) && newline.StartsWith("    { " + toStr))
-                            lengthDiff = toStr.Length - fromStr.Length;
+                        withinML = true;
+                    }
+                    else
+                    {
+                        newline = renumLine(line);
+
+                        // If line to be indented, then indent
+                        if (line.StartsWith(codelineStart))
+                        {
+                            if (lengthDiff < 0)
+                                newline = newline.Remove(0, -lengthDiff);
+                            else if (lengthDiff > 0)
+                                newline = newline.Substring(0, lengthDiff) + newline;
+                        }
+                        else
+                        {
+                            // Recalc indentation
+                            lengthDiff = 0;
+                            foreach (var obj in this.renumberList)
+                            {
+                                var fromStr = obj.FromObjectId.ToString();
+                                var toStr = obj.ToObjectId.ToString();
+                                if (line.StartsWith("    { " + fromStr) && newline.StartsWith("    { " + toStr))
+                                    lengthDiff = toStr.Length - fromStr.Length;
+                            }
+                        }
                     }
                 }
                 if (i < lines.Length - 1)
-                {
                     newcontent.AppendLine(newline);
-                }
                 else
-                {
                     newcontent.Append(newline);
-                }
-
             }
             return newcontent.ToString();
         }
@@ -358,8 +371,29 @@ namespace RenumberObjectIds
             var newcontent = new StringBuilder();
             // Handle different types of newline
             var lines = content.Replace("\r\n", "\r").Replace("\n", "\r").Split('\r');
+            var withinML = false;
             foreach (var line in lines)
-                newcontent.AppendLine(renumLine(line));
+            {
+                var newline = line;
+                if (withinML)
+                {
+                    if (line.Trim().EndsWith("];"))
+                        withinML = false;
+                }
+                else
+                {
+                    if ((line.Trim().StartsWith("CaptionML=[", StringComparison.InvariantCultureIgnoreCase)) ||
+                        (line.Trim().StartsWith("ToolTipML=[", StringComparison.InvariantCultureIgnoreCase)))
+                    {
+                        withinML = true;
+                    }
+                    else
+                    {
+                        newline = renumLine(line);
+                    }
+                }
+                newcontent.AppendLine(newline);
+            }
             return newcontent.ToString();
         }
 
