@@ -302,25 +302,39 @@ namespace RenumberObjectIds
                 string str;
                 if (strstart < 0)
                 {
-                    // No more strings in the file
+                    // No more strings in the line
                     strstart = line.Length;
                     str = "";
                 }
                 else
                 {
-                    // String found in file
+                    // String found in line
                     var quote = line[strstart];
                     var strend = line.IndexOf(quote, strstart + 1);
+                    if (strend == -1)
+                        strend = line.Length - 1;
                     str = line.Substring(strstart, strend - strstart + 1);
                 }
 
-                // Renumber object references in part of file until string                       
+                // Renumber object references in part of line until string
                 var part = line.Substring(idx, strstart - idx);
+                var comment = "";
+                var commentIdx = part.IndexOf("//");
+                if (commentIdx >= 0)
+                {
+                    comment = part.Substring(commentIdx);
+                    part = part.Substring(0, commentIdx);
+                }
+
+                // Perform the actual renumber/replace
                 foreach (var obj in this.renumberList)
                     ReplaceInString(ref part, string.Empty, obj.FromObjectId, obj.ToObjectId);
 
                 // Add part with renumbered objects references
                 newline.Append(part);
+
+                // Add comment (if any)
+                newline.Append(comment);
 
                 // Add String
                 newline.Append(str);
