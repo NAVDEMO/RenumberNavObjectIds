@@ -236,13 +236,21 @@ namespace RenumberObjectIds
             var lines = content.Replace("\r\n", "\r").Replace("\n", "\r").Split('\r');
             var lengthDiff = 0;
             var withinML = false;
+            var withinRDLDATA = false;
             for (var i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];
                 var newline = line;
-                if (withinML)
+                if (withinRDLDATA)
+                {
+                    if (line.Trim().Equals("END_OF_RDLDATA", StringComparison.InvariantCultureIgnoreCase))
+                        withinRDLDATA = false;
+                }
+                else if (withinML)
                 {
                     if (line.Trim().EndsWith("];"))
+                        withinML = false;
+                    if (line.Trim().EndsWith("] }"))
                         withinML = false;
                 }
                 else
@@ -251,6 +259,9 @@ namespace RenumberObjectIds
                         (line.Trim().StartsWith("ToolTipML=[", StringComparison.InvariantCultureIgnoreCase)))
                     {
                         withinML = true;
+                    } else if (line.Trim().Equals("RDLDATA", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        withinRDLDATA = true;
                     }
                     else
                     {
