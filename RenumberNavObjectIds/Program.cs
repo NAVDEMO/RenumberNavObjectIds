@@ -28,30 +28,29 @@ namespace RenumberNavObjectIds
             RenumberIds renumberIds = new RenumberIds();
             renumberIds.OnWriteVerbose += RenumberIds_OnWriteVerbose;
 
-            if (!string.IsNullOrEmpty(options.fromobjectid) || !string.IsNullOrEmpty(options.toobjectid) || !string.IsNullOrEmpty(options.noofobjects))
+            if (!string.IsNullOrEmpty(options.FromObjectId) || !string.IsNullOrEmpty(options.ToObjectId) || !string.IsNullOrEmpty(options.NoOfObjects))
             {
-                int from, to, count;
-                if (int.TryParse(options.fromobjectid, out from) && int.TryParse(options.toobjectid, out to) && int.TryParse(options.noofobjects, out count))
+                if (int.TryParse(options.FromObjectId, out int from) && int.TryParse(options.ToObjectId, out int to) && int.TryParse(options.NoOfObjects, out int count))
                 {
                     try
                     {
-                        renumberIds.PerformRenumber(options.sources, options.destination, from, to, count, options.reverse);
+                        renumberIds.PerformRenumber(options.Sources, options.Destination, from, to, count, options.Reverse, options.DontRename);
                     }
                     catch (Exception e)
                     {
                         Console.WriteLine(options.GetUsage(e.Message));
                         return;
                     }
-                    if (!string.IsNullOrEmpty(options.objectidfile))
+                    if (!string.IsNullOrEmpty(options.ObjectIdFile))
                     {
                         try
                         {
-                            renumberIds.WriteRenumberList(options.objectidfile);
-                            Console.WriteLine(string.Format("Object id file ({0}) updated.", options.objectidfile));
+                            renumberIds.WriteRenumberList(options.ObjectIdFile);
+                            Console.WriteLine(string.Format("Object id file ({0}) updated.", options.ObjectIdFile));
                         }
                         catch 
                         {
-                            Console.WriteLine(options.GetUsage(string.Format("Error writing object id file ({0}).", options.objectidfile)));
+                            Console.WriteLine(options.GetUsage(string.Format("Error writing object id file ({0}).", options.ObjectIdFile)));
                             return;
                         }
                     }
@@ -64,14 +63,14 @@ namespace RenumberNavObjectIds
             }
             else
             {
-                if (string.IsNullOrEmpty(options.objectidfile))
+                if (string.IsNullOrEmpty(options.ObjectIdFile))
                 {
                     Console.WriteLine(options.GetUsage("You need to specify the object id file (-o/--objectidfile) if you don't specify object id range parameters."));
                     return;
                 }
                 try
                 { 
-                    renumberIds.PerformRenumber(options.sources, options.destination, options.objectidfile, options.reverse);
+                    renumberIds.PerformRenumber(options.Sources, options.Destination, options.ObjectIdFile, options.Reverse, options.DontRename);
                 }
                 catch(Exception e)
                 {

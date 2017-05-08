@@ -18,24 +18,24 @@ namespace RenumberObjectIds
         private void WriteVerbose(string message)
         {
             if (this.OnWriteVerbose != null)
-                this.OnWriteVerbose(message);
+                OnWriteVerbose(message);
         }
 
-        public void PerformRenumber(string sourceFolder, string destinationFolder, int fromObjectId, int toObjectId, int noOfObjects, bool reverse = false)
+        public void PerformRenumber(string sourceFolder, string destinationFolder, int fromObjectId, int toObjectId, int noOfObjects, bool reverse = false, bool dontrename = false)
         {
             ClearRenumberList();
             AddToRenumberList(fromObjectId, toObjectId, noOfObjects);
-            PerformRenumber(sourceFolder, destinationFolder, reverse);
+            PerformRenumber(sourceFolder, destinationFolder, reverse, dontrename);
         }
 
-        public void PerformRenumber(string sourceFolder, string destinationFolder, string objectIdFile, bool reverse = false)
+        public void PerformRenumber(string sourceFolder, string destinationFolder, string objectIdFile, bool reverse = false, bool dontrename = false)
         {
             ReadRenumberList(objectIdFile);
-            PerformRenumber(sourceFolder, destinationFolder, reverse);
+            PerformRenumber(sourceFolder, destinationFolder, reverse, dontrename);
         }
 
         // Perform renumber
-        public void PerformRenumber(string sourceFolder, string destinationFolder, bool reverse = false)
+        public void PerformRenumber(string sourceFolder, string destinationFolder, bool reverse = false, bool dontrename = false)
         {
             if (this.renumberList.Count == 0)
             {
@@ -87,19 +87,21 @@ namespace RenumberObjectIds
                     if (!System.IO.Directory.Exists(newdirectory))
                         System.IO.Directory.CreateDirectory(newdirectory);
                     var extension = Path.GetExtension(filename).ToLowerInvariant();
+                    var newFileName = Path.GetFileName(filename);
+                    if (!dontrename)
+                        newFileName = RenumFileName(newFileName);
                     if (extensionList.Any(extension.Equals))
                     {
                         WriteVerbose(string.Format("Renumber {0}", Path.GetFileName(filename)));
                         var encoding = GetNavTextFileEncoding(filename);
                         var content = System.IO.File.ReadAllText(filename, encoding);
-                        renum(extension, ref content);
-                        var newFileName = renumFileName(Path.GetFileName(filename));
+                        Renum(extension, ref content);
                         File.WriteAllText(newdirectory + newFileName, content, encoding);
                     }
                     else
                     {
                         WriteVerbose(string.Format("Copy {0}", Path.GetFileName(filename)));
-                        File.Copy(filename, newdirectory + Path.GetFileName(filename), true);
+                        File.Copy(filename, newdirectory + newFileName, true);
                     }
                     WriteVerbose("OK");
                 }
@@ -190,36 +192,36 @@ namespace RenumberObjectIds
         /// </summary>
         /// <param name="extension">File Extention</param>
         /// <param name="content">File Content</param>
-        private void renum(string extension, ref string content)
+        private void Renum(string extension, ref string content)
         {
             switch (extension)
             {
                 case ".delta":
                     // Renumber object references in DELTA files
-                    content = renumDelta(content);
+                    content = RenumDelta(content);
                     break;
                 case ".txt":
                     if (content.StartsWith("OBJECT", StringComparison.InvariantCultureIgnoreCase))
                         // TXT file is OBJECT metadata - not language file
-                        content = renumDelta(content);
+                        content = RenumDelta(content);
                     else
                         // Renumber object references in language text files
                         foreach (var obj in this.renumberList)
-                            renumTxt(ref content, obj.FromObjectId, obj.ToObjectId);
+                            RenumTxt(ref content, obj.FromObjectId, obj.ToObjectId);
                     break;
                 case ".xml":
                     // Renumber object references in .xml files (permissions or Web services)
                     foreach (var obj in this.renumberList)
-                        renumXml(ref content, obj.FromObjectId, obj.ToObjectId);
+                        RenumXml(ref content, obj.FromObjectId, obj.ToObjectId);
                     break;
                 case ".al":
                     // Renumber object references in .al files (New Development Environment)
-                    content = renumAl(content);
+                    content = RenumAl(content);
                     break;
                 case ".json":
                     // Renumber object references in launch.json file (startupObjectId)
                     foreach (var obj in this.renumberList)
-                        renumJson(ref content, obj.FromObjectId, obj.ToObjectId);
+                        RenumJson(ref content, obj.FromObjectId, obj.ToObjectId);
                     break;
             }
         }
@@ -228,7 +230,7 @@ namespace RenumberObjectIds
         /// Renumber object references in .DELTA files
         /// </summary>
         /// <param name="content">Content of the .DELTA file</param>
-        private string renumDelta(string content)
+        private string RenumDelta(string content)
         {
             var codelineStart = new string(' ', 16);
             var newcontent = new StringBuilder();
@@ -265,7 +267,7 @@ namespace RenumberObjectIds
                     }
                     else
                     {
-                        newline = renumLine(line);
+                        newline = RenumLine(line);
 
                         // If line to be indented, then indent
                         if (line.StartsWith(codelineStart))
@@ -302,7 +304,7 @@ namespace RenumberObjectIds
         /// </summary>
         /// <param name="line">Line from .DELTA file</param>
         /// <returns>New line (with renumbered object references)</returns>
-        private string renumLine(string line)
+        private string RenumLine(string line)
         {
             char[] quotes = { '"', '\'' };
             var idx = 0;
@@ -362,7 +364,7 @@ namespace RenumberObjectIds
         /// <param name="content">Content of a language text file</param>
         /// <param name="from">ObjectId to renumber from</param>
         /// <param name="to">ObjectId to renumber to</param>
-        private void renumTxt(ref string content, int from, int to)
+        private void RenumTxt(ref string content, int from, int to)
         {
             foreach (var prefix in new string[] { "N", "C", "Q", "F", "G" })
             {
@@ -379,7 +381,7 @@ namespace RenumberObjectIds
         /// <param name="content">Content of a .XML file</param>
         /// <param name="from">ObjectId to renumber from</param>
         /// <param name="to">ObjectId to renumber to</param>
-        private void renumXml(ref string content, int from, int to)
+        private void RenumXml(ref string content, int from, int to)
         {
             var str = "<ObjectID>{0}</ObjectID>";
             var fromStr = string.Format(str, from.ToString());
@@ -391,7 +393,7 @@ namespace RenumberObjectIds
         /// Renumber object references in .AL files
         /// </summary>
         /// <param name="content">Content of the .AL file</param>
-        private string renumAl(string content)
+        private string RenumAl(string content)
         {
             var newcontent = new StringBuilder();
             // Handle different types of newline
@@ -414,7 +416,7 @@ namespace RenumberObjectIds
                     }
                     else
                     {
-                        newline = renumLine(line);
+                        newline = RenumLine(line);
                     }
                 }
                 newcontent.AppendLine(newline);
@@ -426,7 +428,7 @@ namespace RenumberObjectIds
         /// Renumber object references in launch.json file
         /// </summary>
         /// <param name="content">Content of the launch.json</param>
-        private void renumJson(ref string content, int from, int to)
+        private void RenumJson(ref string content, int from, int to)
         {
             ReplaceInString(ref content, "\"startupObjectId\": {0}\n", from, to);
             ReplaceInString(ref content, "\"startupObjectId\": {0}\r", from, to);
@@ -493,7 +495,7 @@ namespace RenumberObjectIds
         /// </summary>
         /// <param name="fileName">Filename with Object ID (ex.COD52000.TXT)</param>
         /// <returns>Filename with new Object ID</returns>
-        private string renumFileName(string fileName)
+        private string RenumFileName(string fileName)
         {
             foreach (var obj in this.renumberList)
                 ReplaceInString(ref fileName, string.Empty, obj.FromObjectId, obj.ToObjectId);

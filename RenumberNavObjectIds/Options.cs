@@ -11,25 +11,28 @@ namespace RenumberNavObjectIds
     class Options
     {
         [Option('r', "reverse", Required = false, HelpText = "Reverse (renumber from destination/toObjectId to sources/fromObjectId)")]
-        public bool reverse { get; set; }
+        public bool Reverse { get; set; }
+
+        [Option('m', "dontrename", Required = false, HelpText = "Don't rename files (helps you compare files afterwards)")]
+        public bool DontRename { get; set; }
 
         [Option('s', "sources", Required = false, HelpText = "Folder with source files.")]
-        public string sources { get; set; }
+        public string Sources { get; set; }
 
         [Option('d', "destination", Required = false, HelpText = "Folder in which new source files will be written.")]
-        public string destination { get; set; }
+        public string Destination { get; set; }
 
         [Option('o', "objectidfile", Required = false, HelpText = "Path of XML file holding object id renumber set. (Required if range isn't specified)")]
-        public string objectidfile { get; set; }
+        public string ObjectIdFile { get; set; }
 
         [Option('f', "fromobjectid", Required = false, HelpText = "First object id of the source object id range. (Required if objectidfile isn't specified)")]
-        public string fromobjectid { get; set; }
+        public string FromObjectId { get; set; }
 
         [Option('t', "toobjectid", Required = false, HelpText = "First object id of the destination object id range. (Required if objectidfile isn't specified)")]
-        public string toobjectid { get; set; }
+        public string ToObjectId { get; set; }
 
         [Option('n', "noofobjects", Required = false, HelpText = "Number of object ids in the object id range. (Required if objectidfile isn't specified)")]
-        public string noofobjects { get; set; }
+        public string NoOfObjects { get; set; }
 
         [ParserState]
         public IParserState LastParserState { get; set; }
