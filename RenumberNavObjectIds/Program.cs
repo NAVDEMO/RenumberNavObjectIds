@@ -30,6 +30,9 @@ namespace RenumberNavObjectIds
 
             if (!string.IsNullOrEmpty(options.FromObjectId) || !string.IsNullOrEmpty(options.ToObjectId) || !string.IsNullOrEmpty(options.NoOfObjects))
             {
+                int from;
+                int to;
+                int count;
 
                 if (int.TryParse(options.FromObjectId, out from) && int.TryParse(options.ToObjectId, out to) && int.TryParse(options.NoOfObjects, out count))
                 {
