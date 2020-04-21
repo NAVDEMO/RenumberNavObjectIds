@@ -17,6 +17,10 @@ namespace RenumberObjectIds
         public string DestinationFolder { get; set; }
         [Parameter(Mandatory = true)]
         public Hashtable RenumberList { get; set; }
+        [Parameter(Mandatory = false)]
+        public SwitchParameter Reverse { get; set; }
+        [Parameter(Mandatory = false)]
+        public SwitchParameter DontRename { get; set; }
 
         protected override void ProcessRecord()
         {
@@ -26,7 +30,7 @@ namespace RenumberObjectIds
             {
                 renumberIds.AddToRenumberList((int)obj.Key, (int)obj.Value, 1);
             }
-            renumberIds.PerformRenumber(SourceFolder, DestinationFolder);
+            renumberIds.PerformRenumber(SourceFolder, DestinationFolder, Reverse.ToBool(), DontRename.ToBool());
         }
 
         private void RenumberIds_OnWriteVerbose(string message)
